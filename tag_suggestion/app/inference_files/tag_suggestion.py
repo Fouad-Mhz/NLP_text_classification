@@ -136,7 +136,7 @@ def inference(sentence, embed=embed, mlb=mlb, base_models=loaded_models, meta_mo
     embedded_sentence = embed([transform_dl_fct(sentence, mlb)])
     
     # Make predictions
-    multi_models_suggested_tags = multi_predict_tags(embedded_sentence, mlb, base_models)
-    predicted_labels = meta_predict_tags(embedded_sentence, meta_model, base_models, mlb)
+    multi_result = multi_predict_tags(embedded_sentence, mlb, base_models)
+    meta_result = meta_predict_tags(embedded_sentence, meta_model, base_models, mlb)
 
     return multi_result, meta_result
