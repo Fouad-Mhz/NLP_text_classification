@@ -19,12 +19,12 @@ def show():
 
         # Display Multi Model results
         st.subheader("Multi Model:")
-        multi_line = " | ".join(f"- {tag}" for tag in multi)
+        multi_line = " | ".join(f" {tag.upper()}" for tag in multi)
         st.markdown(multi_line)
 
         # Display Meta Model results
         st.subheader("Meta Model:")
-        meta_line = " | ".join(f"- {tag}" for tag in meta)
+        meta_line = " | ".join(f" {tag.upper()}" for tag in meta)
         st.markdown(meta_line)
 
 if __name__ == "__main__":
