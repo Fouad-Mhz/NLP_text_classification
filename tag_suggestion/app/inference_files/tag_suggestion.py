@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
@@ -9,8 +7,8 @@ from xgboost import XGBClassifier
 from nltk.tokenize import MWETokenizer
 from sklearn.preprocessing import MultiLabelBinarizer
 
-folder_path = 'app/inference_files/'  #'/content/drive/MyDrive/Datasets/'
-models_folder_path= folder_path + 'xgboost_models'
+folder_path = './tag_suggestion/app/inference_files/'  #'/content/drive/MyDrive/Datasets/'
+models_folder_path= folder_path + 'xgboost_models/'
 mlb_filename = folder_path + 'mlb_model.sav'
 meta_model_filename = folder_path + 'meta_model_use.json'
 
@@ -52,15 +50,15 @@ def import_resources():
     mlb = pickle.load(open(mlb_filename, 'rb'))
     print("MultiLabelBinarizer loaded successfully.")
 
-    print("Loading base models...")
-    # Load the base models
-    loaded_models = load_base_models()
-    print("Base models loaded successfully.")
-
     print("Loading meta model...")
     # Load the meta model
     meta_model = load_meta_model()
     print("Meta model loaded successfully.")
+    
+    print("Loading base models...")
+    # Load the base models
+    loaded_models = load_base_models()
+    print("Base models loaded successfully.")
 
     print("Loading Universal Sentence Encoder...")
     # Load Universal Sentence Encoder
@@ -70,6 +68,7 @@ def import_resources():
     return embed, mlb, loaded_models, meta_model
 
 embed, mlb, loaded_models, meta_model = import_resources()
+
 
 # Preprocessing, Tokenization and Embedding functions
 
@@ -115,8 +114,7 @@ def multi_predict_tags(embedded_sentence, mlb, base_models):
         all_predicted_tags.update(predicted_labels)
 
     multi_models_suggested_tags = list(all_predicted_tags)
-    print("Multi models suggested tags:")
-    print(multi_models_suggested_tags)
+    return multi_models_suggested_tags
 
 def meta_predict_tags(embedded_sentence, meta_model, base_models, mlb):
     base_preds = [base_model.predict(embedded_sentence) for base_model in base_models]
@@ -131,13 +129,14 @@ def meta_predict_tags(embedded_sentence, meta_model, base_models, mlb):
 
     # Inverse transform to get the predicted labels
     predicted_labels = mlb.inverse_transform(y_pred_meta)[0]
-
-    print("Meta Model suggested tags:")
-    print(list(predicted_labels))
-
-
+  
+    return predicted_labels
 
 def inference(sentence, embed=embed, mlb=mlb, base_models=loaded_models, meta_model=meta_model):
     embedded_sentence = embed([transform_dl_fct(sentence, mlb)])
-    multi_predict_tags(embedded_sentence, mlb, base_models)
-    meta_predict_tags(embedded_sentence, meta_model, base_models, mlb)
+    
+    # Make predictions
+    multi_models_suggested_tags = multi_predict_tags(embedded_sentence, mlb, base_models)
+    predicted_labels = meta_predict_tags(embedded_sentence, meta_model, base_models, mlb)
+
+    return multi_result, meta_result
